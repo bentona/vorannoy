@@ -25,10 +25,14 @@ closest = (point, allPoints, metric) => {
 }
 
 class Point{
-  constructor(x, y){
+  constructor(x, y, color = true){
     this.x = x;
     this.y = y;
-    this.color = randomColor(x/(dimX*2) + y/(dimY*2));
+
+    if(color){
+      this.color = randomColor(x/(dimX*2) + y/(dimY*2));
+    }
+
   }
 }
 
@@ -56,31 +60,25 @@ colorPoint = (x, y, size, color) => {
   ctx.fillRect(x, y, size, size);
 }
 
-renderPoint = (pt) => {
-  colorPoint(pt.x, pt.y, 5, new Color(0,0,0))
-}
-
 doit = (n) => {
   let points = range(n).map((x) => randomPoint())
-  range(dimX).map( (x) => {
-    range(dimY).map( (y) => {
-      let closestPoint = closest(new Point(x, y), points);
-      colorPoint(x, y, 1, closestPoint.color)
+  let results = cache(distance, points)
+  console.log(results)
+  results.map((xs) => xs.map((ys) => colorPoint(ys[0].x, ys[0].y, ys[1].color)))
+}
+
+pixerate = (x, y, fcn) => {
+  return range(x).map( (x1) => {
+    return range(y).map( (y1) => {
+      return fcn(x1, y1)
     })
   })
 }
 
-pixerate = (x, y, fcn) => {
-  range(x).map( (x1) => {
-    range(y).map( (y1) => {
-      return fcn(x1, y1)
-    }
-  })
-}
-
-cache = (metric) => {
+cache = (metric, points) => {
   pixerate(dimX, dimY, (x, y) => {
-
+    let pt = new Point(x, y, false);
+    return [pt, closest(pt, points, metric)]
   })
 }
 
